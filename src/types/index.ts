@@ -13,8 +13,7 @@ export type PromoType =
   | 'free_bet_sr'     // Free Bet (Stake Returned) — $amount
   | 'deposit_match'   // Deposit Match — $amount
   | 'risk_free'       // Risk-Free / First Bet Reset / No Sweat — $amount
-  | 'profit_boost'    // Profit Boost — % boost + $max_wager
-  | 'odds_boost'      // Odds Boost (specific boosted odds) — $amount
+  | 'profit_boost'    // Profit Boost / Odds Boost — % boost + $max_wager
   | 'bet_and_get'     // Bet & Get — $qualifying_bet + $bonus_amount
   | 'bonus_cash';     // Bonus Cash / Site Credit — $amount (stake returned)
 
@@ -100,8 +99,7 @@ export const PROMO_LABELS: Record<PromoType, string> = {
   free_bet_sr:   'Free Bet (Stake Returned)',
   deposit_match: 'Deposit Match',
   risk_free:     'Risk-Free / First Bet Reset',
-  profit_boost:  'Profit Boost',
-  odds_boost:    'Odds Boost',
+  profit_boost:  'Profit / Odds Boost',
   bet_and_get:   'Bet & Get',
   bonus_cash:    'Bonus Cash / Site Credit',
 };

@@ -30,8 +30,7 @@ export const PROMO_LABELS: Record<PromoType, string> = {
   free_bet_sr:   'Free Bet (Stake Returned)',
   deposit_match: 'Deposit Match',
   risk_free:     'Risk-Free / First Bet Reset',
-  profit_boost:  'Profit Boost',
-  odds_boost:    'Odds Boost',
+  profit_boost:  'Profit / Odds Boost',
   bet_and_get:   'Bet & Get',
   bonus_cash:    'Bonus Cash / Site Credit',
 };
@@ -231,14 +230,6 @@ function buildSteps(
       ];
     }
 
-    case 'odds_boost':
-      return [
-        `1. Use $${amount} on "${promoTeam}" at BOOSTED odds (${bStr}) at ${promoApp}`,
-        `2. Bet ${fmt(layStake)} real money on "${hedgeTeam}" (${hStr}) at ${hedgeApp}`,
-        `3. If ${promoTeam} wins → ${sign(ifPromoWins)}${fmt(ifPromoWins)} guaranteed profit`,
-        `4. If ${hedgeTeam} wins → ${sign(ifHedgeWins)}${fmt(ifHedgeWins)} guaranteed profit`,
-      ];
-
     case 'bet_and_get': {
       const qualifyingBet = amount;
       const bonusAmount = amount2 ?? 0;
@@ -377,12 +368,6 @@ export function calculateTopHedges(
               const r = calcProfitBoost(promo.amount, maxWager, backDecimal, hedgeDecimal);
               ({ layStake, ifPromoWins, ifHedgeWins, guaranteedProfit } = r);
               promoStake = maxWager;
-              break;
-            }
-            case 'odds_boost': {
-              const r = calcFreeBet(promo.amount, backDecimal, hedgeDecimal);
-              ({ layStake, ifPromoWins, ifHedgeWins, guaranteedProfit } = r);
-              promoStake = promo.amount;
               break;
             }
             case 'bet_and_get': {

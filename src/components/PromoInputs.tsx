@@ -11,7 +11,6 @@ const PROMO_TYPES: PromoType[] = [
   'deposit_match',
   'risk_free',
   'profit_boost',
-  'odds_boost',
   'bet_and_get',
   'bonus_cash',
 ];
@@ -36,7 +35,6 @@ const FIELD_CONFIG: Record<PromoType, FieldConfig> = {
   deposit_match: { prefix1: '$', placeholder1: 'Match Amount' },
   risk_free:     { prefix1: '$', placeholder1: 'Max Bet' },
   profit_boost:  { prefix1: '%', placeholder1: 'Boost %', prefix2: '$', placeholder2: 'Max Wager' },
-  odds_boost:    { prefix1: '$', placeholder1: 'Amount' },
   bet_and_get:   { prefix1: '$', placeholder1: 'Qualifying Bet', prefix2: '$', placeholder2: 'Bonus Amount' },
   bonus_cash:    { prefix1: '$', placeholder1: 'Amount' },
 };
