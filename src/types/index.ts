@@ -80,16 +80,35 @@ export interface HedgeResult {
 }
 
 export const SPORTS = [
-  { key: 'basketball_nba',           label: 'NBA' },
-  { key: 'basketball_ncaab',         label: 'CBB' },
-  { key: 'americanfootball_nfl',     label: 'NFL' },
-  { key: 'americanfootball_ncaaf',   label: 'CFB' },
-  { key: 'baseball_mlb',             label: 'MLB' },
-  { key: 'icehockey_nhl',            label: 'NHL' },
-  { key: 'soccer_usa_mls',           label: 'MLS' },
-  { key: 'soccer_epl',               label: 'EPL' },
-  { key: 'soccer_uefa_champs_league', label: 'UCL' },
-  { key: 'icehockey_olympics_mens',  label: 'Hockey (Olympics)' },
+  // Basketball
+  { key: 'basketball_nba',           label: 'Basketball (NBA)' },
+  { key: 'basketball_ncaab',         label: 'College Basketball' },
+  // Football
+  { key: 'americanfootball_nfl',     label: 'Football (NFL)' },
+  { key: 'americanfootball_ncaaf',   label: 'College Football' },
+  // Baseball
+  { key: 'baseball_mlb',             label: 'Baseball (MLB)' },
+  // Hockey
+  { key: 'icehockey_nhl',            label: 'Hockey (NHL)' },
+  // Golf
+  { key: 'golf_masters_tournament_winner', label: 'Golf — Masters' },
+  { key: 'golf_pga_championship_winner',   label: 'Golf — PGA Championship' },
+  { key: 'golf_us_open_winner',            label: 'Golf — US Open' },
+  { key: 'golf_the_open_championship_winner', label: 'Golf — The Open' },
+  // Soccer
+  { key: 'soccer_usa_mls',           label: 'Soccer (MLS)' },
+  { key: 'soccer_epl',               label: 'Soccer (Premier League)' },
+  { key: 'soccer_uefa_champs_league', label: 'Soccer (Champions League)' },
+  { key: 'soccer_spain_la_liga',     label: 'Soccer (La Liga)' },
+  { key: 'soccer_germany_bundesliga', label: 'Soccer (Bundesliga)' },
+  { key: 'soccer_italy_serie_a',     label: 'Soccer (Serie A)' },
+  { key: 'soccer_france_ligue_one',  label: 'Soccer (Ligue 1)' },
+  // Combat
+  { key: 'mma_mixed_martial_arts',   label: 'MMA / UFC' },
+  { key: 'boxing_boxing',            label: 'Boxing' },
+  // Tennis
+  { key: 'tennis_atp_qatar_open',    label: 'Tennis (ATP)' },
+  { key: 'tennis_wta_dubai',         label: 'Tennis (WTA)' },
 ] as const;
 
 export type SportKey = typeof SPORTS[number]['key'];
