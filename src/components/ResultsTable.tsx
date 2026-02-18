@@ -56,6 +56,27 @@ function ResultCard({ result, maxProfit }: { result: HedgeResult; maxProfit: num
         </div>
       </div>
 
+      {/* ── Draw risk warning (3-way markets only) ── */}
+      {result.drawRisk && (
+        <div className="draw-risk-banner">
+          <span className="draw-risk-icon">⚠️</span>
+          <span className="draw-risk-text">
+            3-way market — draw loses{' '}
+            <strong>${Math.abs(result.drawRisk.loss).toFixed(2)}</strong>
+            {' '}(est.{' '}
+            <strong>{(result.drawRisk.probability * 100).toFixed(0)}%</strong>
+            {' '}chance)
+          </span>
+          <span className="draw-risk-sep">·</span>
+          <span className="draw-risk-ev">
+            EV:{' '}
+            <strong className={result.drawRisk.ev >= 0 ? 'green' : 'red'}>
+              {result.drawRisk.ev >= 0 ? '+' : ''}${result.drawRisk.ev.toFixed(2)}
+            </strong>
+          </span>
+        </div>
+      )}
+
       {/* ── Bet details row ── */}
       <div className="result-bets-row">
         <div className="result-bet-block result-bet-promo">
@@ -83,6 +104,13 @@ function ResultCard({ result, maxProfit }: { result: HedgeResult; maxProfit: num
           <span className="outcome-sep">·</span>
           <span className="outcome-label">If hedge wins</span>
           <span className="outcome-val green">+${result.ifHedgeWins.toFixed(2)}</span>
+          {result.drawRisk && (
+            <>
+              <span className="outcome-sep">·</span>
+              <span className="outcome-label">If draw</span>
+              <span className="outcome-val red">${result.drawRisk.loss.toFixed(2)}</span>
+            </>
+          )}
         </div>
       </div>
 

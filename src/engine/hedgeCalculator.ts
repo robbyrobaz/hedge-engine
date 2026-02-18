@@ -296,17 +296,29 @@ export function calculateTopHedges(
         const h2h = promoBm.markets.find(m => m.key === 'h2h');
         if (!h2h || h2h.outcomes.length < 2) continue;
 
+        // Detect 3-way market (soccer Draw, etc.)
+        const isThreeWay = h2h.outcomes.length > 2;
+        const drawOutcomeOnPromoBook = isThreeWay
+          ? h2h.outcomes.find(o => o.name.toLowerCase() === 'draw')
+          : null;
+
         // Try each outcome as the promo bet side
         for (const outcome of h2h.outcomes) {
+          // Never use Draw as the promo bet in 2-way hedge logic
+          if (isThreeWay && outcome.name.toLowerCase() === 'draw') continue;
+
           const backOddsAmerican = outcome.price;
           const backDecimal = americanToDecimal(backOddsAmerican);
           if (backDecimal <= 1) continue;
 
-          // The hedge goes on the OTHER team
-          const otherOutcomes = h2h.outcomes.filter(o => o.name !== outcome.name);
-          if (otherOutcomes.length === 0) continue;
+          // The hedge goes on the opposing team ONLY (exclude Draw from hedge candidates)
+          const allOtherOutcomes = h2h.outcomes.filter(o => o.name !== outcome.name);
+          const hedgeCandidates = isThreeWay
+            ? allOtherOutcomes.filter(o => o.name.toLowerCase() !== 'draw')
+            : allOtherOutcomes;
+          if (hedgeCandidates.length === 0) continue;
 
-          // Find best hedge odds for the other team from any OTHER selected book
+          // Find best hedge odds for the opposing team from any OTHER selected book
           let bestHedgeOdds: number | null = null;
           let bestHedgeAppName: string | null = null;
 
@@ -322,8 +334,8 @@ export function calculateTopHedges(
             const hedgeH2h = hedgeBm.markets.find(m => m.key === 'h2h');
             if (!hedgeH2h) continue;
 
-            for (const other of otherOutcomes) {
-              const hedgeOutcome = hedgeH2h.outcomes.find(o => o.name === other.name);
+            for (const candidate of hedgeCandidates) {
+              const hedgeOutcome = hedgeH2h.outcomes.find(o => o.name === candidate.name);
               if (!hedgeOutcome) continue;
 
               if (bestHedgeOdds === null || hedgeOutcome.price > bestHedgeOdds) {
@@ -338,7 +350,7 @@ export function calculateTopHedges(
           const hedgeDecimal = americanToDecimal(bestHedgeOdds);
           if (hedgeDecimal <= 1) continue;
 
-          const otherTeam = otherOutcomes[0].name;
+          const otherTeam = hedgeCandidates[0].name;
 
           // Calculate profit based on promo type
           let layStake: number;
@@ -397,6 +409,30 @@ export function calculateTopHedges(
 
           if (guaranteedProfit <= 0) continue;
 
+          // ── 3-way draw risk ────────────────────────────────────────────────
+          // If the game draws, both the promo bet and the hedge bet lose.
+          // We calculate the draw probability from the promo book's implied odds,
+          // then compute expected value (EV) factoring in that risk.
+          let drawRisk: HedgeResult['drawRisk'] = null;
+          if (isThreeWay && drawOutcomeOnPromoBook) {
+            const drawDecimal = americanToDecimal(drawOutcomeOnPromoBook.price);
+            // Total implied probability (all 3 legs at promo-book prices)
+            const totalImplied =
+              1 / backDecimal +
+              1 / americanToDecimal(hedgeCandidates[0].price) +
+              1 / drawDecimal;
+            const drawProb = (1 / drawDecimal) / totalImplied;
+            // Loss = total capital at risk (promo stake + hedge stake)
+            const drawLoss = -(promoStake + layStake);
+            const ev = guaranteedProfit * (1 - drawProb) + drawLoss * drawProb;
+            drawRisk = {
+              loss: Math.round(drawLoss * 100) / 100,
+              probability: Math.round(drawProb * 10000) / 10000,
+              ev: Math.round(ev * 100) / 100,
+            };
+          }
+          // ──────────────────────────────────────────────────────────────────
+
           const efficiencyBase = promo.type === 'profit_boost' ? (promo.amount2 ?? promo.amount)
             : promo.type === 'bet_and_get' ? (promo.amount2 ?? promo.amount)
             : promo.amount;
@@ -443,13 +479,19 @@ export function calculateTopHedges(
             ifPromoWins: Math.round(ifPromoWins * 100) / 100,
             ifHedgeWins: Math.round(ifHedgeWins * 100) / 100,
             steps,
+            drawRisk,
           });
         }
       }
     }
   }
 
-  // Rank by guaranteed profit descending
-  results.sort((a, b) => b.guaranteedProfit - a.guaranteedProfit);
+  // Sort by EV: for 3-way markets use drawRisk.ev, for 2-way use guaranteedProfit.
+  // This ensures soccer results with draw risk are ranked honestly.
+  results.sort((a, b) => {
+    const evA = a.drawRisk?.ev ?? a.guaranteedProfit;
+    const evB = b.drawRisk?.ev ?? b.guaranteedProfit;
+    return evB - evA;
+  });
   return results.slice(0, topN).map((r, i) => ({ ...r, rank: i + 1 }));
 }

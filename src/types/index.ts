@@ -77,6 +77,17 @@ export interface HedgeResult {
   ifPromoWins: number;
   ifHedgeWins: number;
   steps: string[];
+  /**
+   * 3-way market draw risk (soccer, etc.). null for 2-way markets.
+   * If the game draws, both bets lose and `loss` is the total capital lost.
+   * `probability` is the implied draw chance from market odds.
+   * `ev` is expected value factoring in draw probability.
+   */
+  drawRisk: {
+    loss: number;        // negative: total loss if draw occurs
+    probability: number; // 0–1 implied draw probability
+    ev: number;          // EV = guaranteedProfit*(1-drawProb) + loss*drawProb
+  } | null;
 }
 
 /**

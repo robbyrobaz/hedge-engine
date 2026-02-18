@@ -637,6 +637,22 @@ select option { background: #131920; }
 }
 .result-step:first-child { color: var(--text); }
 
+/* ─── Draw Risk Banner (3-way markets) ───────────────────────────────────── */
+.draw-risk-banner {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 16px;
+  background: rgba(255, 82, 82, 0.08);
+  border-top: 1px solid rgba(255, 82, 82, 0.2);
+  border-bottom: 1px solid rgba(255, 82, 82, 0.2);
+  font-size: 12px;
+}
+.draw-risk-icon { font-size: 14px; }
+.draw-risk-text { color: var(--text); }
+.draw-risk-sep  { color: var(--text-muted); }
+.draw-risk-ev   { color: var(--text-muted); }
+.outcome-val.red { color: var(--red); }
+.red { color: var(--red); }
+
 /* ─── Responsive (result cards) ─────────────────────────────────────────────*/
 
 @media (max-width: 700px) {
