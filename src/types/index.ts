@@ -79,37 +79,32 @@ export interface HedgeResult {
   steps: string[];
 }
 
-export const SPORTS = [
-  // Basketball
-  { key: 'basketball_nba',           label: 'Basketball (NBA)' },
-  { key: 'basketball_ncaab',         label: 'College Basketball' },
-  // Football
-  { key: 'americanfootball_nfl',     label: 'Football (NFL)' },
-  { key: 'americanfootball_ncaaf',   label: 'College Football' },
-  // Baseball
-  { key: 'baseball_mlb',             label: 'Baseball (MLB)' },
-  // Hockey
-  { key: 'icehockey_nhl',            label: 'Hockey (NHL)' },
-  // Golf
-  { key: 'golf_masters_tournament_winner', label: 'Golf — Masters' },
-  { key: 'golf_pga_championship_winner',   label: 'Golf — PGA Championship' },
-  { key: 'golf_us_open_winner',            label: 'Golf — US Open' },
-  { key: 'golf_the_open_championship_winner', label: 'Golf — The Open' },
-  // Soccer
-  { key: 'soccer_usa_mls',           label: 'Soccer (MLS)' },
-  { key: 'soccer_epl',               label: 'Soccer (Premier League)' },
-  { key: 'soccer_uefa_champs_league', label: 'Soccer (Champions League)' },
-  { key: 'soccer_spain_la_liga',     label: 'Soccer (La Liga)' },
-  { key: 'soccer_germany_bundesliga', label: 'Soccer (Bundesliga)' },
-  { key: 'soccer_italy_serie_a',     label: 'Soccer (Serie A)' },
-  { key: 'soccer_france_ligue_one',  label: 'Soccer (Ligue 1)' },
-  // Combat
-  { key: 'mma_mixed_martial_arts',   label: 'MMA / UFC' },
-  { key: 'boxing_boxing',            label: 'Boxing' },
-  // Tennis
-  { key: 'tennis_atp_qatar_open',    label: 'Tennis (ATP)' },
-  { key: 'tennis_wta_dubai',         label: 'Tennis (WTA)' },
-] as const;
+/**
+ * SPORT GROUPS — user picks a category, engine matches all leagues within it.
+ * Each group has a list of API keys that get fetched & matched.
+ */
+export interface SportGroup {
+  id: string;
+  label: string;
+  keys: string[];
+}
+
+export const SPORT_GROUPS: SportGroup[] = [
+  { id: 'basketball', label: 'Basketball',     keys: ['basketball_nba', 'basketball_ncaab'] },
+  { id: 'football',   label: 'Football',       keys: ['americanfootball_nfl', 'americanfootball_ncaaf'] },
+  { id: 'baseball',   label: 'Baseball',       keys: ['baseball_mlb'] },
+  { id: 'hockey',     label: 'Hockey',         keys: ['icehockey_nhl'] },
+  { id: 'golf',       label: 'Golf',           keys: ['golf_masters_tournament_winner', 'golf_pga_championship_winner', 'golf_us_open_winner', 'golf_the_open_championship_winner'] },
+  { id: 'soccer',     label: 'Soccer',         keys: ['soccer_usa_mls', 'soccer_epl', 'soccer_uefa_champs_league', 'soccer_spain_la_liga', 'soccer_germany_bundesliga', 'soccer_italy_serie_a', 'soccer_france_ligue_one'] },
+  { id: 'mma',        label: 'MMA / UFC',      keys: ['mma_mixed_martial_arts'] },
+  { id: 'boxing',     label: 'Boxing',          keys: ['boxing_boxing'] },
+  { id: 'tennis',     label: 'Tennis',          keys: ['tennis_atp_qatar_open', 'tennis_wta_dubai'] },
+];
+
+/** Flat list of all API sport keys (for fetching) */
+export const SPORTS = SPORT_GROUPS.flatMap(g => g.keys.map(key => ({ key, label: g.label, group: g.id })));
+
+export type SportKey = string;
 
 export type SportKey = typeof SPORTS[number]['key'];
 

@@ -5,7 +5,15 @@
  */
 
 import type { Promo, GameOdds, HedgeResult, PromoType } from '../types';
+import { SPORT_GROUPS } from '../types';
 import { APP_MAP } from '../data/apps';
+
+/** Resolve a sport group id to its list of API keys */
+function sportGroupKeys(sportId: string): string[] | null {
+  if (!sportId || sportId === 'all') return null; // null = match all
+  const group = SPORT_GROUPS.find(g => g.id === sportId);
+  return group ? group.keys : null;
+}
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
@@ -278,8 +286,9 @@ export function calculateTopHedges(
 
       // Find all games where this promo bookmaker has odds
       for (const game of games) {
-        // Sport filter: skip games that don't match the promo's sport restriction
-        if (promo.sport && promo.sport !== 'all' && game.sport !== promo.sport) continue;
+        // Sport filter: skip games that don't match the promo's sport group
+        const allowedKeys = sportGroupKeys(promo.sport);
+        if (allowedKeys && !allowedKeys.includes(game.sport)) continue;
 
         const promoBm = game.bookmakers.find(bm => bm.key === promoApp.oddsApiKey);
         if (!promoBm) continue;

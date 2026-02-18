@@ -2,7 +2,7 @@ import React from 'react';
 import { useArbStore } from '../store/useArbStore';
 import { APP_MAP } from '../data/apps';
 import type { Promo, PromoType } from '../types';
-import { SPORTS } from '../types';
+import { SPORT_GROUPS } from '../types';
 import { PROMO_LABELS } from '../engine/hedgeCalculator';
 
 const PROMO_TYPES: PromoType[] = [
@@ -15,10 +15,10 @@ const PROMO_TYPES: PromoType[] = [
   'bonus_cash',
 ];
 
-/** Sport options for the filter dropdown */
+/** Sport options for the filter dropdown — grouped by category */
 const SPORT_OPTIONS = [
   { value: 'all', label: 'All Sports' },
-  ...SPORTS.map(s => ({ value: s.key, label: s.label })),
+  ...SPORT_GROUPS.map(g => ({ value: g.id, label: g.label })),
 ];
 
 /** Field config per promo type */
