@@ -55,7 +55,7 @@ function OddsStatusBar() {
 }
 
 function CalculateBar() {
-  const { selectedAppIds, promosByApp, calculate, reset, isCalculating } = useArbStore();
+  const { selectedAppIds, promosByApp, calculate, reset, isCalculating, maxBudget, setMaxBudget } = useArbStore();
 
   const totalPromos = selectedAppIds.reduce(
     (sum, id) => sum + (promosByApp[id]?.filter(p => p.amount > 0).length ?? 0),
@@ -76,6 +76,17 @@ function CalculateBar() {
         </div>
       </div>
       <div className="calc-bar-right">
+        <div className="input-group">
+          <span className="input-prefix">$</span>
+          <input
+            className="input-field"
+            type="number"
+            placeholder="Max budget"
+            value={maxBudget || ''}
+            min={0}
+            onChange={e => setMaxBudget(parseFloat(e.target.value) || 0)}
+          />
+        </div>
         <button className="btn-reset" onClick={reset}>Reset</button>
         <button
           className={`btn-calculate ${canCalc ? 'btn-calculate--active' : ''}`}

@@ -20,12 +20,16 @@ interface ArbState {
   fetchCount: number;   // today's API fetches (from localStorage)
   maxFetches: number;   // daily limit
 
+  // Budget
+  maxBudget: number;  // 0 = no limit
+
   // Results
   results: HedgeResult[];
   isCalculating: boolean;
   hasCalculated: boolean;
 
   // Actions
+  setMaxBudget: (amount: number) => void;
   toggleApp: (appId: string) => void;
   addPromo: (appId: string) => void;
   updatePromo: (appId: string, promoId: string, update: Partial<Promo>) => void;
@@ -75,9 +79,12 @@ export const useArbStore = create<ArbState>((set, get) => ({
   isFetching: false,
   fetchCount: initialOdds.fetchCount,
   maxFetches: initialOdds.maxFetches,
+  maxBudget: 0,
   results: [],
   isCalculating: false,
   hasCalculated: false,
+
+  setMaxBudget: (amount) => set({ maxBudget: amount, hasCalculated: false }),
 
   toggleApp: (appId) => set((state) => {
     const isSelected = state.selectedAppIds.includes(appId);
@@ -182,7 +189,23 @@ export const useArbStore = create<ArbState>((set, get) => ({
       promos: promosByApp[appId] ?? [],
     }));
 
-    const results = calculateTopHedges(input, games, selectedAppIds, 10);
+    const { maxBudget } = get();
+    let results = calculateTopHedges(input, games, selectedAppIds, 50); // get more, then filter
+
+    // Filter by max budget (total out-of-pocket = hedge stake + promo stake for real-money types)
+    if (maxBudget > 0) {
+      results = results.filter(r => {
+        const totalCost = r.hedgeBet.stake + (
+          r.promoBet.promoType === 'free_bet' || r.promoBet.promoType === 'free_bet_sr' || r.promoBet.promoType === 'bonus_cash'
+            ? 0  // free money — no out-of-pocket for promo side
+            : r.promoBet.stake
+        );
+        return totalCost <= maxBudget;
+      });
+    }
+
+    // Re-rank and take top 10
+    results = results.slice(0, 10).map((r, i) => ({ ...r, rank: i + 1 }));
 
     set({ results, isCalculating: false, hasCalculated: true });
   },
