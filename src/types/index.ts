@@ -115,9 +115,16 @@ export const SPORT_GROUPS: SportGroup[] = [
 /** Flat list of all API sport keys (for fetching) */
 export const SPORTS = SPORT_GROUPS.flatMap(g => g.keys.map(key => ({ key, label: g.label, group: g.id })));
 
-export type SportKey = string;
-
 export type SportKey = typeof SPORTS[number]['key'];
+
+export interface Preset {
+  id: string;
+  name: string;
+  savedAt: string; // ISO timestamp
+  selectedAppIds: string[];
+  promosByApp: Record<string, Promo[]>;
+  maxBudget: number;
+}
 
 export const PROMO_LABELS: Record<PromoType, string> = {
   free_bet:      'Free Bet (SNR)',

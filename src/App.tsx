@@ -1,6 +1,7 @@
 import { AppSelector } from './components/AppSelector';
 import { PromoInputs } from './components/PromoInputs';
 import { ResultsTable } from './components/ResultsTable';
+import { PresetManager } from './components/PresetManager';
 import { useArbStore } from './store/useArbStore';
 import './App.css';
 
@@ -118,6 +119,7 @@ export default function App() {
       </header>
 
       <main className="main">
+        <PresetManager />
         <AppSelector />
         <PromoInputs />
         <CalculateBar />
