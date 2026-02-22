@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Promo, PromoType, HedgeResult, GameOdds, Preset } from '../types';
 import { calculateTopHedges } from '../engine/hedgeCalculator';
 import { fetchAllOdds, getCacheStatus } from '../services/oddsApi';
+import { fetchSharedPresets, writeSharedPresets } from '../services/presetsSync';
 
 const PRESETS_KEY = 'hedgeengine_presets';
 
@@ -263,6 +264,7 @@ export const useArbStore = create<ArbState>((set, get) => ({
     const updated = [...presets, preset];
     savePresetsToStorage(updated);
     set({ presets: updated });
+    writeSharedPresets(updated);
   },
 
   loadPreset: (id) => {
@@ -295,6 +297,7 @@ export const useArbStore = create<ArbState>((set, get) => ({
     const updated = presets.filter(p => p.id !== id);
     savePresetsToStorage(updated);
     set({ presets: updated });
+    writeSharedPresets(updated);
   },
 
   renamePreset: (id, name) => {
@@ -302,5 +305,15 @@ export const useArbStore = create<ArbState>((set, get) => ({
     const updated = presets.map(p => p.id === id ? { ...p, name: name.trim() || p.name } : p);
     savePresetsToStorage(updated);
     set({ presets: updated });
+    writeSharedPresets(updated);
   },
 }));
+
+// On startup, quietly pull the shared presets from GitHub and replace local state.
+// This ensures both users always see the same set of presets on page load.
+fetchSharedPresets().then(remote => {
+  if (remote.length > 0) {
+    savePresetsToStorage(remote);
+    useArbStore.setState({ presets: remote });
+  }
+});
