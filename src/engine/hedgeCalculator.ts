@@ -98,15 +98,24 @@ function calcDepositMatch(amount: number, backDecimal: number, hedgeDecimal: num
 
 /**
  * RISK-FREE BET (stake refunded as free bet on loss)
- * Phase 1: hedge real bet (same as deposit match formula)
- * Phase 2: if hedge wins → receive free bet, convert at ~70% value
+ *
+ * Two-phase strategy: hedge SMALL in phase 1 so you WANT to lose (getting the
+ * free bet cheaply), then convert the free bet in phase 2 at ~70% efficiency.
+ *
+ * Phase 1 optimal hedge: layStake = amount / hedgeDecimal
+ *   - If promo wins: big profit (bonus upside — long-shot wins)
+ *   - If hedge wins: small net loss (-amount/hedgeDecimal), but you receive the free bet
+ *
+ * Phase 2: free bet (SNR) converted at ~70% of calcFreeBet guaranteed profit
+ *   ifHedgeWins = phase1Net + freeBetValue
  */
-function calcRiskFree(amount: number, backDecimal: number, hedgeDecimal: number): CalcResult {
-  const layStake = (amount * backDecimal) / hedgeDecimal;
+export function calcRiskFree(amount: number, backDecimal: number, hedgeDecimal: number): CalcResult {
+  const layStake = amount / hedgeDecimal;
   const ifPromoWins = amount * (backDecimal - 1) - layStake;
-  const phase1Loss = layStake - amount;
+  // phase1Net when hedge wins: hedge payout minus lost promo stake (always negative)
+  const phase1Net = layStake * (hedgeDecimal - 1) - amount; // = -amount/hedgeDecimal
   const freeBetValue = 0.7 * calcFreeBet(amount, backDecimal, hedgeDecimal).guaranteedProfit;
-  const ifHedgeWins = phase1Loss + freeBetValue;
+  const ifHedgeWins = phase1Net + freeBetValue;
   const guaranteedProfit = Math.min(ifPromoWins, ifHedgeWins);
   return { layStake, ifPromoWins, ifHedgeWins, guaranteedProfit };
 }
