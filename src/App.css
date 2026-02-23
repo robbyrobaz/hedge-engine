@@ -803,10 +803,45 @@ select option { background: #131920; }
   border-bottom: 1px solid rgba(255, 82, 82, 0.2);
   font-size: 12px;
 }
+.draw-risk-banner--prominent {
+  background: rgba(255, 82, 82, 0.18);
+  border-top-color: rgba(255, 82, 82, 0.5);
+  border-bottom-color: rgba(255, 82, 82, 0.5);
+}
+.draw-risk-banner--prominent .draw-risk-text { color: #ff8a80; font-weight: 500; }
 .draw-risk-icon { font-size: 14px; }
 .draw-risk-text { color: var(--text); }
 .draw-risk-sep  { color: var(--text-muted); }
 .draw-risk-ev   { color: var(--text-muted); }
+
+/* ─── 3-way market toggle ────────────────────────────────────────────────── */
+.three-way-toggle {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-3);
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.three-way-toggle:hover { border-color: var(--border); color: var(--text); }
+.three-way-toggle input[type="checkbox"] {
+  accent-color: var(--cyan);
+  width: 13px; height: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.three-way-hidden-count {
+  font-size: 10px; font-weight: 700;
+  color: #ff8a80;
+  background: rgba(255, 82, 82, 0.15);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
 .outcome-val.red { color: var(--red); }
 .red { color: var(--red); }
 

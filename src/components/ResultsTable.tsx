@@ -1,6 +1,13 @@
+import { useState, useEffect } from 'react';
 import { useArbStore } from '../store/useArbStore';
 import type { HedgeResult } from '../types';
 import { PROMO_LABELS, formatOdds } from '../engine/hedgeCalculator';
+
+const SHOW_3WAY_KEY = 'hedgeengine_show_3way';
+
+function loadShow3Way(): boolean {
+  try { return localStorage.getItem(SHOW_3WAY_KEY) === 'true'; } catch { return false; }
+}
 
 const RANK_COLORS = ['#ffd700', '#c0c0c0', '#cd7f32', '#00e5ff', '#00e5ff'];
 
@@ -31,7 +38,7 @@ function ProfitBar({ profit, max }: { profit: number; max: number }) {
   );
 }
 
-function ResultCard({ result, maxProfit }: { result: HedgeResult; maxProfit: number }) {
+function ResultCard({ result, maxProfit, prominentDrawRisk }: { result: HedgeResult; maxProfit: number; prominentDrawRisk: boolean }) {
   const rankColor = RANK_COLORS[result.rank - 1] ?? '#555';
   const sport = SPORT_LABELS[result.game.sport] ?? result.game.sport;
 
@@ -58,14 +65,14 @@ function ResultCard({ result, maxProfit }: { result: HedgeResult; maxProfit: num
 
       {/* ── Draw risk warning (3-way markets only) ── */}
       {result.drawRisk && (
-        <div className="draw-risk-banner">
+        <div className={`draw-risk-banner${prominentDrawRisk ? ' draw-risk-banner--prominent' : ''}`}>
           <span className="draw-risk-icon">⚠️</span>
           <span className="draw-risk-text">
             3-way market — draw loses{' '}
             <strong>${Math.abs(result.drawRisk.loss).toFixed(2)}</strong>
             {' '}(est.{' '}
             <strong>{(result.drawRisk.probability * 100).toFixed(0)}%</strong>
-            {' '}chance)
+            {' '}chance) — NOT a guaranteed profit
           </span>
           <span className="draw-risk-sep">·</span>
           <span className="draw-risk-ev">
@@ -126,6 +133,11 @@ function ResultCard({ result, maxProfit }: { result: HedgeResult; maxProfit: num
 
 export function ResultsTable() {
   const { results, hasCalculated, isCalculating } = useArbStore();
+  const [showThreeWay, setShowThreeWay] = useState(loadShow3Way);
+
+  useEffect(() => {
+    try { localStorage.setItem(SHOW_3WAY_KEY, String(showThreeWay)); } catch {}
+  }, [showThreeWay]);
 
   if (isCalculating) {
     return (
@@ -156,14 +168,27 @@ export function ResultsTable() {
     );
   }
 
-  const maxProfit = results[0].guaranteedProfit;
-  const totalProfit = results.reduce((s, r) => s + r.guaranteedProfit, 0);
+  const visibleResults = showThreeWay ? results : results.filter(r => !r.drawRisk);
+  const hiddenCount = results.length - visibleResults.length;
+  const maxProfit = visibleResults.length > 0 ? visibleResults[0].guaranteedProfit : 0;
+  const totalProfit = visibleResults.reduce((s, r) => s + r.guaranteedProfit, 0);
 
   return (
     <section className="section results-section">
       <div className="section-header">
         <span className="step-badge step-badge--green">04</span>
-        <h2>Top {results.length} Hedge Setups</h2>
+        <h2>Top {visibleResults.length} Hedge Setups</h2>
+        <label className="three-way-toggle">
+          <input
+            type="checkbox"
+            checked={showThreeWay}
+            onChange={e => setShowThreeWay(e.target.checked)}
+          />
+          <span>Show 3-way markets</span>
+          {hiddenCount > 0 && !showThreeWay && (
+            <span className="three-way-hidden-count">{hiddenCount} hidden</span>
+          )}
+        </label>
         <div className="results-summary">
           <span className="summary-item">
             <span className="summary-label">Best</span>
@@ -178,9 +203,24 @@ export function ResultsTable() {
       </div>
 
       <div className="results-list">
-        {results.map(result => (
-          <ResultCard key={`${result.rank}-${result.game.homeTeam}-${result.promoBet.app}`} result={result} maxProfit={maxProfit} />
-        ))}
+        {visibleResults.length === 0 ? (
+          <div className="no-results">
+            <span className="no-results-icon">🔍</span>
+            <h3>No guaranteed-profit hedges found</h3>
+            <p>
+              All results are 3-way markets (draw risk). Enable "Show 3-way markets" above to see them.
+            </p>
+          </div>
+        ) : (
+          visibleResults.map(result => (
+            <ResultCard
+              key={`${result.rank}-${result.game.homeTeam}-${result.promoBet.app}`}
+              result={result}
+              maxProfit={maxProfit}
+              prominentDrawRisk={showThreeWay}
+            />
+          ))
+        )}
       </div>
 
       <p className="results-disclaimer">
